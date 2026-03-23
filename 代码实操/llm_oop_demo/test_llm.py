@@ -1,27 +1,20 @@
-# 从llm_base.py里导入我们写好的两个子类
-from llm_base import QwenLLM, ZhipuLLM
+from llm_client import ZhipuLLM,QwenLLM
+from dotenv import load_dotenv
+import os
 
-# 程序入口，只有直接运行这个文件时才会执行
+load_dotenv()
+
 if __name__ == "__main__":
-    # 测试用的提示词，可自行修改
-    test_prompt = "用一句话给新手解释什么是面向对象编程"
+    # ---------------------- 1. 测试通义千问 ----------------------
+    print("-----千问-------")
+    qwen_client = QwenLLM(api_key=os.getenv("DASHSCOPE_API_KEY"),model_name="qwen-turbo")
 
-    # ========== 测试通义千问 ==========
-    print("\n===== 通义千问测试 =====")
-    # 实例化通义千问类
-    qwen_model = QwenLLM()
-    # 调用call方法，获取模型返回结果
-    qwen_result = qwen_model.call(test_prompt)
-    # 打印结果
-    if qwen_result:
-        print(f"返回结果：{qwen_result}")
+    qwen_reply = qwen_client.call("你好，1+1等于几？用一句话回答")
+    print(f"通义千问回复：{qwen_reply}\n")
 
-    # ========== 测试智谱AI ==========
-    print("\n===== 智谱AI测试 =====")
-    # 实例化智谱AI类
-    zhipu_model = ZhipuLLM()
-    # 调用call方法
-    zhipu_result = zhipu_model.call(test_prompt)
-    # 打印结果
-    if zhipu_result:
-        print(f"返回结果：{zhipu_result}")
+    # ---------------------- 1. 测试zhipuAI ----------------------
+    print("-----智谱-------")
+    zhipu_client = ZhipuLLM(api_key = os.getenv("ZHIPUAI_API_KEY"), model_name="glm-4-flash")
+
+    zhipu_reply = zhipu_client.call("你好，2+1等于几？用一句话回答")
+    print(f"智谱回复：{zhipu_reply}\n")
