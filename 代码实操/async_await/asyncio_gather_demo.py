@@ -1,32 +1,27 @@
 import asyncio
 import time
-from asyncio import gather
+from turtledemo.penrose import start
 
-"""
-asyncio.gather()批量并发执行、异步异常处理；
-"""
-async def call_qwen(prompt):
-    print(f"通义千问：开始处理：{prompt}")
-    await asyncio.sleep(2)
-    return f"通义回复：{prompt} → 答案是2"
 
-async def call_zhipu(prompt):
-    print(f"智谱AI：开始处理：{prompt}")
-    await asyncio.sleep(1)
-    return f"智谱回复：{prompt} → 答案是3"
+async def work(name,seconds):
+    print(f"任务{name}开始，耗时{seconds}秒")
+    await asyncio.sleep(seconds)
+    print(f"任务{name}完成")
+    return f"任务{name}的结果"
 
 async def main():
-    start_time = time.time()
+    start = time.time()
+
+    # 批量并发执行3个任务，await等待所有任务完成，返回结果列表
     results = await asyncio.gather(
-        call_qwen("1+1等于几"),
-        call_zhipu("2+1等于几"),
-        call_qwen("3+3等于几"),  # 可以无限加任务
-        call_zhipu("4+4等于几")
+        work('A',2),
+        work('B',1),
+        work('C',1.5),
     )
 
-    end_time = time.time()
-    print(f"\n所有任务执行完成，结果列表：{results}")
-    print(f"总耗时：{end_time - start_time:.2f}秒")  # 还是2秒左右
+    end = time.time()
+    print(f"总耗时：{end - start:.2f}秒")
+    print("所有任务结果：", results)
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -3,35 +3,30 @@ import time
 
 import asyncio
 """
-aiohttp异步 HTTP 请求库（替代同步的 requests，Agent 工具调用必备）
-用 aiohttp 并发发 3 个请求，3 个请求「同时」发出去，一起等待响应
+我们常用的requests是同步库,发请求时会阻塞线程
+aiohttp是异步 HTTP 请求库，完全适配 asyncio，是异步场景下替代 requests 的首
 """
 
-# 异步请求示例：多个请求同时等待，总耗时只等于最慢的一个
-async def async_request():
-    urls = [
-        "https://www.baidu.com",
-        "https://www.baidu.com",
-        "https://www.baidu.com"
-    ]
-    start = time.time()
+# 定义异步请求函数
+async def fetch_url(session,url,name):
+    print(f"开始请求{name}：{url}")
+    #发送GET请求,async with：异步上下文管理器（自动关闭请求）
+    async with session.get(url) as response:
+        # 异步读取响应内容
+        result = await response.json()
+        print(f"请求{name}完成，状态码：{response.status}")
+        return f"{name}结果：{result['origin']}"
 
-    # 1. 创建一个 ClientSession（类比 requests 的会话，复用连接，性能高）
+async def main():
+    # 复用session，提升性能
     async with aiohttp.ClientSession() as session:
-    # 2. 定义一个单独的异步请求函数
-        async def fetch(url):
-            async with session.get(url) as response:
-                return await response.text()
-
-    # 3. 用 asyncio.gather 并发执行所有请求
+        # 批量并发请求3个接口
         results = await asyncio.gather(
-            fetch(urls[0]),
-            fetch(urls[1]),
-            fetch(urls[2]),
+            fetch_url(session, "https://httpbin.org/get", "接口A"),
+            fetch_url(session, "https://httpbin.org/get", "接口B"),
+            fetch_url(session, "https://httpbin.org/get", "接口C")
         )
-        print("所有请求完成")
+    print("所有请求结果：", results)
 
-    end = time.time()
-    print(f"异步总耗时：{end - start:.2f} 秒")
-
-asyncio.run(async_request())
+if __name__ == "__main__":
+    asyncio.run(main())

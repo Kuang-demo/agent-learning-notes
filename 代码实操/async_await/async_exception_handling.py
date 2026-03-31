@@ -1,28 +1,32 @@
-"""
-一个任务失败，不影响其他任务执行。
-带异常处理的并发执行
-"""
 import asyncio
-
-async def call_llm(model_name , prompt,sleep_time, has_error = False):
-    try:
-        print(f"{model_name}：开始处理")
-        await asyncio.sleep(sleep_time)
-        if has_error:
-            raise Exception(f"{model_name} API调用失败！")
-        print(f"{model_name}：处理完成")
-        return f"{model_name} 回复：{prompt} 的答案"
-    except Exception as e:
-        print(f"❌ {e}")
-        return f"{model_name} 调用失败"
+"""
+异步发送http请求
+"""
+async def work(name,seconds):
+    print(f"任务{name}开始")
+    await asyncio.sleep(seconds)
+    if name == 'B':
+        raise Exception(f"任务{name}执行出错！")
+    print(f"任务{name}完成")
+    return f"任务{name}的结果"
 
 async def main():
+    # 单个任务的异常处理
+    try:
+        res = await work('B',1)
+        print(res)
+    except Exception as e:
+        print("捕获到异常：", e)
+
+    print("--- 批量任务的异常处理 ---")
+    # return_exceptions=True：异常会当成结果返回，不会中断其他任务
     results = await asyncio.gather(
-        call_llm("千问","1+1=多少",2),
-        call_llm("智谱AI", "2+1=多少", 1,True),
-        call_llm("豆包", "3+3=多少", 3),
-
+        work('A',2),
+        work('B',1),
+        work('C',1.5),
+        return_exceptions = True
     )
-    print(f"\n最终结果：{results}")
+    print("所有结果（包含异常）：", results)
 
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())
