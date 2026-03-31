@@ -24,13 +24,14 @@ class WeatherTool:
         }
 
         try:
-            timeout = aiohttp.ClientTimeout(total=10)
-            async with aiohttp.ClientSession(timeout=timeout) as session:
-                async with session.get(self.weather_url, params=params) as response:
-                    response.raise_for_status()
-                    result = await response.json()
-
-                    if result.get("status") == "1":
+            # 2. 发起网络请求（异步）
+            timeout = aiohttp.ClientTimeout(total=10) # 超时时间：10秒没响应就报错
+            async with aiohttp.ClientSession(timeout=timeout) as session:# 创建请求会话
+                async with session.get(self.weather_url, params=params) as response:  # 发GET请求
+                    response.raise_for_status() # 如果请求失败（比如404/500），直接报错
+                    result = await response.json()# 把返回的JSON转成Python字典
+                    # 3. 处理响应结果
+                    if result.get("status") == "1": # 高德API返回status=1表示成功
                         return result
                     else:
                         raise Exception(f"[Weather Error] {result.get('info', '未知错误')}")

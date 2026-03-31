@@ -63,7 +63,7 @@ class WeatherAgent:
             return f"抱歉，系统出错了: {str(e)}"
 
     async def _handle_tool_call(self, llm_response: Dict[str, Any]) -> str:
-        """处理工具调用逻辑"""
+        # 1. 提取工具调用信息（大模型说“要调用get_weather，参数是city=北京，extensions=base”）
         tool_call = llm_response["tool_calls"][0]
         tool_name = tool_call["function"]["name"]
         tool_args = json.loads(tool_call["function"]["arguments"])
